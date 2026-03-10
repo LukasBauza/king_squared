@@ -47,7 +47,7 @@ impl Board {
                 PieceType::BlackKnights,
                 PieceType::BlackRooks,
             ],
-            0,
+            7,
             &mut pieces,
         );
 
