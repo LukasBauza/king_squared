@@ -87,78 +87,29 @@ impl Board {
         for rank in (0..8).rev() {
             for file in 0..8 {
                 for (index, bitboard) in self.bitboards.iter().enumerate() {
+                    // TODO: It is not actually needed to check wether there is
+                    // a bit, as every bit should be associated with one board.
                     let square = crate::utils::get_square_index(rank, file as u8);
                     let bit = (bitboard >> square) & 1;
 
                     let board_type = BoardType::try_from(index);
 
+                    #[rustfmt::skip]
                     match board_type {
-                        Ok(BoardType::WhitePawns) => {
-                            if bit == 1 {
-                                print!("WP")
-                            }
-                        }
-                        Ok(BoardType::WhiteKnights) => {
-                            if bit == 1 {
-                                print!("WN")
-                            }
-                        }
-                        Ok(BoardType::WhiteBishops) => {
-                            if bit == 1 {
-                                print!("WB")
-                            }
-                        }
-                        Ok(BoardType::WhiteRooks) => {
-                            if bit == 1 {
-                                print!("WR")
-                            }
-                        }
-                        Ok(BoardType::WhiteQueens) => {
-                            if bit == 1 {
-                                print!("WQ")
-                            }
-                        }
-                        Ok(BoardType::WhiteKing) => {
-                            if bit == 1 {
-                                print!("WK")
-                            }
-                        }
+                        Ok(BoardType::WhitePawns) => if bit == 1 { print!("WP") },
+                        Ok(BoardType::WhiteKnights) => if bit == 1 { print!("WN") },
+                        Ok(BoardType::WhiteBishops) => if bit == 1 { print!("WB") },
+                        Ok(BoardType::WhiteRooks) => if bit == 1 { print!("WR") },
+                        Ok(BoardType::WhiteQueens) => if bit == 1 { print!("WQ") },
+                        Ok(BoardType::WhiteKing) => if bit == 1 { print!("WK") },
 
-                        Ok(BoardType::BlackPawns) => {
-                            if bit == 1 {
-                                print!("BP")
-                            }
-                        }
-                        Ok(BoardType::BlackKnights) => {
-                            if bit == 1 {
-                                print!("BN")
-                            }
-                        }
-                        Ok(BoardType::BlackBishops) => {
-                            if bit == 1 {
-                                print!("BB")
-                            }
-                        }
-                        Ok(BoardType::BlackRooks) => {
-                            if bit == 1 {
-                                print!("BR")
-                            }
-                        }
-                        Ok(BoardType::BlackQueens) => {
-                            if bit == 1 {
-                                print!("BQ")
-                            }
-                        }
-                        Ok(BoardType::BlackKing) => {
-                            if bit == 1 {
-                                print!("BK")
-                            }
-                        }
-                        Ok(BoardType::Empty) => {
-                            if bit == 1 {
-                                print!(" ..")
-                            }
-                        }
+                        Ok(BoardType::BlackPawns) => if bit == 1 { print!("BP") },
+                        Ok(BoardType::BlackKnights) => if bit == 1 { print!("BN") },
+                        Ok(BoardType::BlackBishops) => if bit == 1 { print!("BB") },
+                        Ok(BoardType::BlackRooks) => if bit == 1 { print!("BR") },
+                        Ok(BoardType::BlackQueens) => if bit == 1 { print!("BQ") },
+                        Ok(BoardType::BlackKing) => if bit == 1 { print!("BK") },
+                        Ok(BoardType::Empty) => if bit == 1 { print!(" ..") },
                         Ok(BoardType::Occupied)
                         | Ok(BoardType::WhitePieces)
                         | Ok(BoardType::BlackPieces) => continue,
