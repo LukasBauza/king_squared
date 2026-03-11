@@ -77,13 +77,10 @@ impl Board {
                 let square = crate::utils::get_square_index(rank, file as u8);
                 let bit = (bit_board >> square) & 1;
 
-                if bit == 1 {
-                    print!("1");
-                } else {
-                    print!(".");
-                }
+                print!("{}", if bit == 1 { "1" } else { "." })
             }
             println!();
         }
     }
 }
+
