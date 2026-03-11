@@ -1,10 +1,10 @@
 mod board;
 mod utils;
 
-use crate::board::{Board, PieceType};
+use crate::board::Board;
 
 fn main() {
     let board = Board::new();
 
-    board.display_piece_bitboard(PieceType::BlackBishops);
+    board.display_bitboard(board::BoardType::BlackBishops);
 }
