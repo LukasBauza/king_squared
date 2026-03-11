@@ -69,17 +69,21 @@ impl Board {
         }
     }
 
-    pub(crate) fn get_piece_bitboard(&self, piece: PieceType) -> u64 {
-        return self.pieces[piece as usize];
-    }
+    pub(crate) fn display_piece_bitboard(&self, piece_type: PieceType) {
+        let bit_board = self.pieces[piece_type as usize];
 
-    fn get_empty_bitboard(&self) -> u64 {
-        return self.empty;
-    }
+        for rank in (0..8).rev() {
+            for file in 0..8 {
+                let square = crate::utils::get_square_index(rank, file as u8);
+                let bit = (bit_board >> square) & 1;
 
-    fn get_occupied_bitboard(&self) -> u64 {
-        return self.occupied;
+                if bit == 1 {
+                    print!("1");
+                } else {
+                    print!(".");
+                }
+            }
+            println!();
+        }
     }
-    
-    // TODO: Create method to display the bitboard.
 }
