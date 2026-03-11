@@ -54,9 +54,22 @@ impl Board {
             &mut bitboards,
         );
 
+        bitboards[BoardType::WhitePieces as usize] = bitboards[BoardType::WhitePawns as usize]
+            | bitboards[BoardType::WhiteKnights as usize]
+            | bitboards[BoardType::WhiteBishops as usize]
+            | bitboards[BoardType::WhiteRooks as usize]
+            | bitboards[BoardType::WhiteQueens as usize]
+            | bitboards[BoardType::WhiteKing as usize];
+
+        bitboards[BoardType::BlackPieces as usize] = bitboards[BoardType::BlackPawns as usize]
+            | bitboards[BoardType::BlackKnights as usize]
+            | bitboards[BoardType::BlackBishops as usize]
+            | bitboards[BoardType::BlackRooks as usize]
+            | bitboards[BoardType::BlackQueens as usize]
+            | bitboards[BoardType::BlackKing as usize];
+
         bitboards[BoardType::Occupied as usize] =
             bitboards[BoardType::WhitePieces as usize] | bitboards[BoardType::BlackPieces as usize];
-        // FIX: For some reason this is not being updated properly.
         bitboards[BoardType::Empty as usize] = !bitboards[BoardType::Occupied as usize];
 
         Self { bitboards }
@@ -94,22 +107,74 @@ impl Board {
 
                     let board_type = BoardType::try_from(index);
 
-                    #[rustfmt::skip]
+                    //#[rustfmt::skip]
                     match board_type {
-                        Ok(BoardType::WhitePawns) => if bit == 1 { print!("WP") },
-                        Ok(BoardType::WhiteKnights) => if bit == 1 { print!("WN") },
-                        Ok(BoardType::WhiteBishops) => if bit == 1 { print!("WB") },
-                        Ok(BoardType::WhiteRooks) => if bit == 1 { print!("WR") },
-                        Ok(BoardType::WhiteQueens) => if bit == 1 { print!("WQ") },
-                        Ok(BoardType::WhiteKing) => if bit == 1 { print!("WK") },
+                        Ok(BoardType::WhitePawns) => {
+                            if bit == 1 {
+                                print!(" WP")
+                            }
+                        }
+                        Ok(BoardType::WhiteKnights) => {
+                            if bit == 1 {
+                                print!(" WN")
+                            }
+                        }
+                        Ok(BoardType::WhiteBishops) => {
+                            if bit == 1 {
+                                print!(" WB")
+                            }
+                        }
+                        Ok(BoardType::WhiteRooks) => {
+                            if bit == 1 {
+                                print!(" WR")
+                            }
+                        }
+                        Ok(BoardType::WhiteQueens) => {
+                            if bit == 1 {
+                                print!(" WQ")
+                            }
+                        }
+                        Ok(BoardType::WhiteKing) => {
+                            if bit == 1 {
+                                print!(" WK")
+                            }
+                        }
 
-                        Ok(BoardType::BlackPawns) => if bit == 1 { print!("BP") },
-                        Ok(BoardType::BlackKnights) => if bit == 1 { print!("BN") },
-                        Ok(BoardType::BlackBishops) => if bit == 1 { print!("BB") },
-                        Ok(BoardType::BlackRooks) => if bit == 1 { print!("BR") },
-                        Ok(BoardType::BlackQueens) => if bit == 1 { print!("BQ") },
-                        Ok(BoardType::BlackKing) => if bit == 1 { print!("BK") },
-                        Ok(BoardType::Empty) => if bit == 1 { print!(" ..") },
+                        Ok(BoardType::BlackPawns) => {
+                            if bit == 1 {
+                                print!(" BP")
+                            }
+                        }
+                        Ok(BoardType::BlackKnights) => {
+                            if bit == 1 {
+                                print!(" BN")
+                            }
+                        }
+                        Ok(BoardType::BlackBishops) => {
+                            if bit == 1 {
+                                print!(" BB")
+                            }
+                        }
+                        Ok(BoardType::BlackRooks) => {
+                            if bit == 1 {
+                                print!(" BR")
+                            }
+                        }
+                        Ok(BoardType::BlackQueens) => {
+                            if bit == 1 {
+                                print!(" BQ")
+                            }
+                        }
+                        Ok(BoardType::BlackKing) => {
+                            if bit == 1 {
+                                print!(" BK")
+                            }
+                        }
+                        Ok(BoardType::Empty) => {
+                            if bit == 1 {
+                                print!(" ..")
+                            }
+                        }
                         Ok(BoardType::Occupied)
                         | Ok(BoardType::WhitePieces)
                         | Ok(BoardType::BlackPieces) => continue,
