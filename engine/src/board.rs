@@ -96,6 +96,7 @@ impl Board {
         }
     }
 
+    // TODO: This whole function could probably be rewritten better
     pub(crate) fn display_chess_board(&self) {
         for rank in (0..8).rev() {
             for file in 0..8 {
