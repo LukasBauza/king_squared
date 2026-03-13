@@ -16,6 +16,10 @@ pub(crate)enum BoardType {
 
 pub(crate) struct Board {
     bitboards: [u64; 16],
+    side_to_move: bool,
+    castling_rights: u8,
+    en_passant_square: u8,
+    half_move_clock: u8,
 }
 
 impl Board {
