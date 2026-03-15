@@ -1,21 +1,34 @@
 use strum::IntoEnumIterator;
 
-use crate::types::{Bitboard, Color, File, Occupancy, Piece, Rank, Square};
+use crate::{
+    types::{Bitboard, Color, File, Occupancy, Piece, Rank, Square},
+    utils::get_square_index,
+};
 
 pub struct Board {
     pieces: [[Bitboard; 6]; 2],
     occupancies: [Bitboard; 4],
 
-    side_to_move: bool,
+    side_to_move: Color,
 
+    // TODO: These need to be changed, for better abstraction.
     castling_rights: u8,
     en_passant_square: u8,
     half_move_clock: u8,
 }
 
 impl Board {
-    fn set_chess_board(&mut self) {
-        const BACK_RANK_PIECES: [Piece; 8] = [
+    pub fn new() -> Self {
+        let mut board = Self {
+            pieces: [[0; 6]; 2],
+            occupancies: [0; 4],
+            side_to_move: Color::White,
+            castling_rights: 0xF,
+            en_passant_square: 64,
+            half_move_clock: 0,
+        };
+
+        const BACK_RANK: [Piece; 8] = [
             Piece::Rook,
             Piece::Knight,
             Piece::Bishop,
@@ -26,13 +39,66 @@ impl Board {
             Piece::Rook,
         ];
 
-        for (file, piece) in BACK_RANK_PIECES.iter().enumerate() {
-            self.set_piece(Color::White, piece, square);
+        board.set_pieces_on_rank(Color::White, BACK_RANK, Rank::First);
+        board.set_pieces_on_rank(Color::White, [Piece::Pawn; 8], Rank::Second);
+        board.set_pieces_on_rank(Color::Black, BACK_RANK, Rank::Eight);
+        board.set_pieces_on_rank(Color::Black, [Piece::Pawn; 8], Rank::Seventh);
+        board.update_occupancy();
+
+        return board;
+    }
+
+    pub fn display_chess_board(&self) {
+        println!("\n  a  b  c  d  e  f  g  h");
+
+        for rank in Rank::iter() {
+            print!("{}", (rank as u8) + 1);
+
+            for file in File::iter() {
+                let square_index = get_square_index(rank, file);
+                let bit_mask = 1u64 << square_index as u8;
+                let mut square_content = " ..";
+
+                for color in Color::iter() {
+                    for piece in Piece::iter() {
+                        if (self.pieces[color as usize][piece as usize] & bit_mask) == 0 {
+                            continue;
+                        }
+
+                        square_content = match piece {
+                            Piece::Pawn => "P",
+                            Piece::Knight => "N",
+                            Piece::Bishop => "B",
+                            Piece::Rook => "R",
+                            Piece::Queen => "Q",
+                            Piece::King => "K",
+                        };
+
+                        match color {
+                            Color::White => print!(" w{}", square_content),
+                            Color::Black => print!(" b{}", square_content),
+                        };
+                    }
+                }
+                if square_content == " .." {
+                    print!(" ..");
+                }
+            }
+            println!();
         }
     }
 
-    fn set_piece(&mut self, color: Color, piece: Piece, square: Square) {
+    fn set_piece_on_square(&mut self, color: Color, piece: Piece, square: Square) {
         self.pieces[color as usize][piece as usize] |= 1u64 << square as u64;
+    }
+
+    // TODO: Is this needed?
+    fn set_pieces_on_rank(&mut self, color: Color, pieces: [Piece; 8], rank: Rank) {
+        for file in File::iter() {
+            let square: Square = get_square_index(rank, file);
+
+            self.set_piece_on_square(color, pieces[file as usize], square);
+        }
     }
 
     fn update_occupancy(&mut self) {
