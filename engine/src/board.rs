@@ -1,193 +1,119 @@
-use num_enum::TryFromPrimitive;
+use strum::IntoEnumIterator;
 
-#[rustfmt::skip]
-#[derive(Copy, Clone, TryFromPrimitive)]
-#[repr(usize)]
-pub(crate)enum BoardType {
-    WhitePawns = 0, WhiteKnights = 1, WhiteBishops = 2, WhiteRooks = 3, WhiteQueens = 4, WhiteKing = 5,
-    BlackPawns = 6, BlackKnights = 7, BlackBishops = 8, BlackRooks = 9, BlackQueens = 10, BlackKing = 11,
+use crate::{
+    types::{Bitboard, Color, File, Occupancy, Piece, Rank, Square},
+    utils::get_square_index,
+};
 
-    // Adding these will save time in calculation, as you don't need to count each array individually.
-    WhitePieces = 12,
-    BlackPieces = 13,
-    Occupied = 14,
-    Empty = 15
-}
+pub struct Board {
+    pieces: [[Bitboard; 6]; 2],
+    occupancies: [Bitboard; 4],
 
-pub(crate) struct Board {
-    bitboards: [u64; 16],
-    side_to_move: bool,
+    side_to_move: Color,
+
+    // TODO: These need to be changed, for better abstraction.
     castling_rights: u8,
     en_passant_square: u8,
     half_move_clock: u8,
 }
 
 impl Board {
-    pub(crate) fn new() -> Self {
-        let mut bitboards = [0u64; 16];
+    pub fn new() -> Self {
+        let mut board = Self {
+            pieces: [[0; 6]; 2],
+            occupancies: [0; 4],
+            side_to_move: Color::White,
+            castling_rights: 0xF,
+            en_passant_square: 64,
+            half_move_clock: 0,
+        };
 
-        Self::set_rank_pieces([BoardType::WhitePawns; 8], 1, &mut bitboards);
-        Self::set_rank_pieces(
-            [
-                BoardType::WhiteRooks,
-                BoardType::WhiteKnights,
-                BoardType::WhiteBishops,
-                BoardType::WhiteQueens,
-                BoardType::WhiteKing,
-                BoardType::WhiteBishops,
-                BoardType::WhiteKnights,
-                BoardType::WhiteRooks,
-            ],
-            0,
-            &mut bitboards,
-        );
+        const BACK_RANK: [Piece; 8] = [
+            Piece::Rook,
+            Piece::Knight,
+            Piece::Bishop,
+            Piece::Queen,
+            Piece::King,
+            Piece::Bishop,
+            Piece::Knight,
+            Piece::Rook,
+        ];
 
-        Self::set_rank_pieces([BoardType::BlackPawns; 8], 6, &mut bitboards);
-        Self::set_rank_pieces(
-            [
-                BoardType::BlackRooks,
-                BoardType::BlackKnights,
-                BoardType::BlackBishops,
-                BoardType::BlackQueens,
-                BoardType::BlackKing,
-                BoardType::BlackBishops,
-                BoardType::BlackKnights,
-                BoardType::BlackRooks,
-            ],
-            7,
-            &mut bitboards,
-        );
+        board.set_pieces_on_rank(Color::White, BACK_RANK, Rank::First);
+        board.set_pieces_on_rank(Color::White, [Piece::Pawn; 8], Rank::Second);
+        board.set_pieces_on_rank(Color::Black, BACK_RANK, Rank::Eight);
+        board.set_pieces_on_rank(Color::Black, [Piece::Pawn; 8], Rank::Seventh);
+        board.update_occupancy();
 
-        bitboards[BoardType::WhitePieces as usize] = bitboards[BoardType::WhitePawns as usize]
-            | bitboards[BoardType::WhiteKnights as usize]
-            | bitboards[BoardType::WhiteBishops as usize]
-            | bitboards[BoardType::WhiteRooks as usize]
-            | bitboards[BoardType::WhiteQueens as usize]
-            | bitboards[BoardType::WhiteKing as usize];
-
-        bitboards[BoardType::BlackPieces as usize] = bitboards[BoardType::BlackPawns as usize]
-            | bitboards[BoardType::BlackKnights as usize]
-            | bitboards[BoardType::BlackBishops as usize]
-            | bitboards[BoardType::BlackRooks as usize]
-            | bitboards[BoardType::BlackQueens as usize]
-            | bitboards[BoardType::BlackKing as usize];
-
-        bitboards[BoardType::Occupied as usize] =
-            bitboards[BoardType::WhitePieces as usize] | bitboards[BoardType::BlackPieces as usize];
-        bitboards[BoardType::Empty as usize] = !bitboards[BoardType::Occupied as usize];
-
-        Self { bitboards }
+        return board;
     }
 
-    fn set_rank_pieces(piece_type: [BoardType; 8], rank: u8, bitboards: &mut [u64; 16]) {
-        for (file, piece) in piece_type.iter().enumerate() {
-            let sq = crate::utils::get_square_index(rank, file as u8);
-            bitboards[*piece as usize] |= 1u64 << sq;
-        }
-    }
+    pub fn display_chess_board(&self) {
+        println!("\n  a  b  c  d  e  f  g  h");
 
-    pub(crate) fn display_bitboard(&self, board_type: BoardType) {
-        let bitboard = self.bitboards[board_type as usize];
+        for rank in Rank::iter() {
+            print!("{}", (rank as u8) + 1);
 
-        for rank in (0..8).rev() {
-            for file in 0..8 {
-                let square = crate::utils::get_square_index(rank, file as u8);
-                let bit = (bitboard >> square) & 1;
+            for file in File::iter() {
+                let square_index = get_square_index(rank, file);
+                let bit_mask = 1u64 << square_index as u8;
+                let mut square_content = " ..";
 
-                print!("{}", if bit == 1 { "1" } else { "." })
-            }
-            println!();
-        }
-    }
-
-    // TODO: This whole function could probably be rewritten better
-    pub(crate) fn display_chess_board(&self) {
-        for rank in (0..8).rev() {
-            for file in 0..8 {
-                for (index, bitboard) in self.bitboards.iter().enumerate() {
-                    // TODO: It is not actually needed to check wether there is
-                    // a bit, as every bit should be associated with one board.
-                    let square = crate::utils::get_square_index(rank, file as u8);
-                    let bit = (bitboard >> square) & 1;
-
-                    let board_type = BoardType::try_from(index);
-
-                    //#[rustfmt::skip]
-                    match board_type {
-                        Ok(BoardType::WhitePawns) => {
-                            if bit == 1 {
-                                print!(" WP")
-                            }
-                        }
-                        Ok(BoardType::WhiteKnights) => {
-                            if bit == 1 {
-                                print!(" WN")
-                            }
-                        }
-                        Ok(BoardType::WhiteBishops) => {
-                            if bit == 1 {
-                                print!(" WB")
-                            }
-                        }
-                        Ok(BoardType::WhiteRooks) => {
-                            if bit == 1 {
-                                print!(" WR")
-                            }
-                        }
-                        Ok(BoardType::WhiteQueens) => {
-                            if bit == 1 {
-                                print!(" WQ")
-                            }
-                        }
-                        Ok(BoardType::WhiteKing) => {
-                            if bit == 1 {
-                                print!(" WK")
-                            }
+                for color in Color::iter() {
+                    for piece in Piece::iter() {
+                        if (self.pieces[color as usize][piece as usize] & bit_mask) == 0 {
+                            continue;
                         }
 
-                        Ok(BoardType::BlackPawns) => {
-                            if bit == 1 {
-                                print!(" BP")
-                            }
-                        }
-                        Ok(BoardType::BlackKnights) => {
-                            if bit == 1 {
-                                print!(" BN")
-                            }
-                        }
-                        Ok(BoardType::BlackBishops) => {
-                            if bit == 1 {
-                                print!(" BB")
-                            }
-                        }
-                        Ok(BoardType::BlackRooks) => {
-                            if bit == 1 {
-                                print!(" BR")
-                            }
-                        }
-                        Ok(BoardType::BlackQueens) => {
-                            if bit == 1 {
-                                print!(" BQ")
-                            }
-                        }
-                        Ok(BoardType::BlackKing) => {
-                            if bit == 1 {
-                                print!(" BK")
-                            }
-                        }
-                        Ok(BoardType::Empty) => {
-                            if bit == 1 {
-                                print!(" ..")
-                            }
-                        }
-                        Ok(BoardType::Occupied)
-                        | Ok(BoardType::WhitePieces)
-                        | Ok(BoardType::BlackPieces) => continue,
-                        Err(_) => print!("??"),
+                        square_content = match piece {
+                            Piece::Pawn => "P",
+                            Piece::Knight => "N",
+                            Piece::Bishop => "B",
+                            Piece::Rook => "R",
+                            Piece::Queen => "Q",
+                            Piece::King => "K",
+                        };
+
+                        match color {
+                            Color::White => print!(" w{}", square_content),
+                            Color::Black => print!(" b{}", square_content),
+                        };
                     }
+                }
+                if square_content == " .." {
+                    print!(" ..");
                 }
             }
             println!();
         }
+    }
+
+    fn set_piece_on_square(&mut self, color: Color, piece: Piece, square: Square) {
+        self.pieces[color as usize][piece as usize] |= 1u64 << square as u64;
+    }
+
+    // TODO: Is this needed?
+    fn set_pieces_on_rank(&mut self, color: Color, pieces: [Piece; 8], rank: Rank) {
+        for file in File::iter() {
+            let square: Square = get_square_index(rank, file);
+
+            self.set_piece_on_square(color, pieces[file as usize], square);
+        }
+    }
+
+    fn update_occupancy(&mut self) {
+        for color in Color::iter() {
+            for piece in Piece::iter() {
+                self.occupancies[Occupancy::White as usize] |=
+                    self.pieces[color as usize][piece as usize];
+            }
+        }
+
+        self.occupancies[Occupancy::Occupied as usize] |= self.occupancies
+            [Occupancy::White as usize]
+            | self.occupancies[Occupancy::Black as usize];
+
+        self.occupancies[Occupancy::Empty as usize] =
+            !self.occupancies[Occupancy::Occupied as usize];
     }
 }

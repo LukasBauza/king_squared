@@ -1,11 +1,11 @@
-mod board;
-mod utils;
-
 use crate::board::Board;
 
-fn main() {
-    let board = Board::new();
+mod board;
+mod types;
+mod utils;
 
-    //board.display_bitboard(board::BoardType::Occupied);
+fn main() {
+    let board: Board = Board::new();
+
     board.display_chess_board();
 }
