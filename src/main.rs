@@ -1,6 +1,8 @@
 use crate::board::Board;
 
 mod board;
+mod movegen;
+mod pawnmove;
 mod types;
 mod utils;
 
