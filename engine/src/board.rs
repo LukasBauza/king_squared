@@ -5,6 +5,9 @@ use crate::{
     utils::get_square_index,
 };
 
+const NOT_A_FILE: Bitboard = 0xfefefefefefefefe;
+const NOT_H_FILE: Bitboard = 0x7f7f7f7f7f7f7f7f;
+
 pub struct Board {
     pieces: [[Bitboard; 6]; 2],
     occupancies: [Bitboard; 4],
@@ -46,6 +49,38 @@ impl Board {
         board.update_occupancy();
 
         return board;
+    }
+
+    pub fn shift_north(bitboard: Bitboard) -> Bitboard {
+        bitboard << 8
+    }
+
+    pub fn shift_south(bitboard: Bitboard) -> Bitboard {
+        bitboard >> 8
+    }
+
+    pub fn shift_east(bitboard: Bitboard) -> Bitboard {
+        (bitboard << 1) & NOT_A_FILE
+    }
+
+    pub fn shift_west(bitboard: Bitboard) -> Bitboard {
+        (bitboard >> 1) & NOT_H_FILE
+    }
+
+    pub fn shift_north_east(bitboard: Bitboard) -> Bitboard {
+        (bitboard << 9) & NOT_A_FILE
+    }
+
+    pub fn shift_north_west(bitboard: Bitboard) -> Bitboard {
+        (bitboard << 7) & NOT_H_FILE
+    }
+
+    pub fn shift_south_east(bitboard: Bitboard) -> Bitboard {
+        (bitboard >> 7) & NOT_H_FILE
+    }
+
+    pub fn shift_south_west(bitboard: Bitboard) -> Bitboard {
+        (bitboard >> 9) & NOT_A_FILE
     }
 
     pub fn display_chess_board(&self) {
