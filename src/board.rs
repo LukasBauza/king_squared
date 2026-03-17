@@ -2,7 +2,7 @@ use strum::IntoEnumIterator;
 
 use crate::{
     types::{Bitboard, Color, File, Occupancy, Piece, Rank, Square},
-    utils::{display_bitboard, get_square_index},
+    utils::get_square_index,
 };
 
 pub struct Board {
