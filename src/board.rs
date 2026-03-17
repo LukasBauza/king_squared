@@ -51,7 +51,7 @@ impl Board {
     pub fn display_chess_board(&self) {
         println!("\n  a  b  c  d  e  f  g  h");
 
-        for rank in Rank::iter() {
+        for rank in Rank::iter().rev() {
             print!("{}", (rank as u8) + 1);
 
             for file in File::iter() {
