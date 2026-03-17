@@ -1,4 +1,9 @@
-use crate::{board::Board, types::Color};
+use crate::{
+    board::Board,
+    pawnmove::get_single_push_targets,
+    types::{Color, Occupancy, Piece},
+    utils::display_bitboard,
+};
 
 mod board;
 mod movegen;
@@ -11,5 +16,9 @@ fn main() {
 
     board.display_chess_board();
 
-    board.display_piece_bitboard(Color::Black, types::Piece::Pawn);
+    display_bitboard(get_single_push_targets(
+        board.pieces[Color::White as usize][Piece::Pawn as usize],
+        Color::White,
+        board.occupancies[Occupancy::Empty as usize],
+    ));
 }
