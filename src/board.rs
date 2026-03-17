@@ -130,6 +130,8 @@ impl Board {
     }
 
     fn update_occupancy(&mut self) {
+        self.occupancies = [0; 4];
+
         for piece in Piece::iter() {
             self.occupancies[Occupancy::White as usize] |=
                 self.pieces[Color::White as usize][piece as usize];
