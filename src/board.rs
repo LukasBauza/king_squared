@@ -2,12 +2,12 @@ use strum::IntoEnumIterator;
 
 use crate::{
     types::{Bitboard, Color, File, Occupancy, Piece, Rank, Square},
-    utils::get_square_index,
+    utils::{display_bitboard, get_square_index},
 };
 
 pub struct Board {
-    pieces: [[Bitboard; 6]; 2],
-    occupancies: [Bitboard; 4],
+    pub pieces: [[Bitboard; 6]; 2],
+    pub occupancies: [Bitboard; 4],
 
     side_to_move: Color,
 
@@ -83,34 +83,6 @@ impl Board {
                 if square_content == " .." {
                     print!(" ..");
                 }
-            }
-            println!();
-        }
-    }
-
-    pub fn display_occupied_bitboard(&self, occupancy: Occupancy) {
-        let bitboard = match occupancy {
-            Occupancy::White => self.occupancies[Occupancy::White as usize],
-            Occupancy::Black => self.occupancies[Occupancy::Black as usize],
-            Occupancy::Occupied => self.occupancies[Occupancy::Occupied as usize],
-            Occupancy::Empty => self.occupancies[Occupancy::Empty as usize],
-        };
-
-        self.display_bitboard(bitboard);
-    }
-
-    pub fn display_piece_bitboard(&self, color: Color, piece: Piece) {
-        self.display_bitboard(self.pieces[color as usize][piece as usize]);
-    }
-
-    fn display_bitboard(&self, bitboard: Bitboard) {
-        println!("\n  a b c d e f g h");
-        for rank in Rank::iter().rev() {
-            print!("{}", (rank as u8) + 1);
-            for file in File::iter() {
-                let mask = 1u64 << get_square_index(rank, file) as u64;
-
-                print!("{}", if (bitboard & mask) != 0 { " 1" } else { " 0" });
             }
             println!();
         }
