@@ -5,12 +5,9 @@ use crate::{
     utils::get_square_index,
 };
 
-const NOT_A_FILE: Bitboard = 0xfefefefefefefefe;
-const NOT_H_FILE: Bitboard = 0x7f7f7f7f7f7f7f7f;
-
 pub struct Board {
-    pieces: [[Bitboard; 6]; 2],
-    occupancies: [Bitboard; 4],
+    pub pieces: [[Bitboard; 6]; 2],
+    pub occupancies: [Bitboard; 4],
 
     side_to_move: Color,
 
@@ -51,42 +48,10 @@ impl Board {
         return board;
     }
 
-    pub fn shift_north(bitboard: Bitboard) -> Bitboard {
-        bitboard << 8
-    }
-
-    pub fn shift_south(bitboard: Bitboard) -> Bitboard {
-        bitboard >> 8
-    }
-
-    pub fn shift_east(bitboard: Bitboard) -> Bitboard {
-        (bitboard << 1) & NOT_A_FILE
-    }
-
-    pub fn shift_west(bitboard: Bitboard) -> Bitboard {
-        (bitboard >> 1) & NOT_H_FILE
-    }
-
-    pub fn shift_north_east(bitboard: Bitboard) -> Bitboard {
-        (bitboard << 9) & NOT_A_FILE
-    }
-
-    pub fn shift_north_west(bitboard: Bitboard) -> Bitboard {
-        (bitboard << 7) & NOT_H_FILE
-    }
-
-    pub fn shift_south_east(bitboard: Bitboard) -> Bitboard {
-        (bitboard >> 7) & NOT_H_FILE
-    }
-
-    pub fn shift_south_west(bitboard: Bitboard) -> Bitboard {
-        (bitboard >> 9) & NOT_A_FILE
-    }
-
     pub fn display_chess_board(&self) {
         println!("\n  a  b  c  d  e  f  g  h");
 
-        for rank in Rank::iter() {
+        for rank in Rank::iter().rev() {
             print!("{}", (rank as u8) + 1);
 
             for file in File::iter() {
@@ -137,11 +102,13 @@ impl Board {
     }
 
     fn update_occupancy(&mut self) {
-        for color in Color::iter() {
-            for piece in Piece::iter() {
-                self.occupancies[Occupancy::White as usize] |=
-                    self.pieces[color as usize][piece as usize];
-            }
+        self.occupancies = [0; 4];
+
+        for piece in Piece::iter() {
+            self.occupancies[Occupancy::White as usize] |=
+                self.pieces[Color::White as usize][piece as usize];
+            self.occupancies[Occupancy::Black as usize] |=
+                self.pieces[Color::Black as usize][piece as usize];
         }
 
         self.occupancies[Occupancy::Occupied as usize] |= self.occupancies
