@@ -1,4 +1,7 @@
-use crate::movegen::{shift_north, shift_south};
+use crate::movegen::{
+    shift_north, shift_north_east, shift_north_west, shift_south, shift_south_east,
+    shift_south_west,
+};
 use crate::types::{Bitboard, Color};
 
 pub fn get_single_push_targets(pawns: Bitboard, color: Color, empty: Bitboard) -> Bitboard {
@@ -20,5 +23,12 @@ pub fn get_double_push_targets(pawns: Bitboard, color: Color, empty: Bitboard) -
 
             return (get_single_push_targets(pawns, color, empty) >> 8) & empty & RANK5;
         }
+    }
+}
+
+pub fn get_attack_targets(pawns: Bitboard, color: Color) -> Bitboard {
+    match color {
+        Color::White => return shift_north_east(pawns) | shift_north_west(pawns),
+        Color::Black => return shift_south_east(pawns) | shift_south_west(pawns),
     }
 }
