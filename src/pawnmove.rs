@@ -18,7 +18,7 @@ pub fn get_double_push_targets(pawns: Bitboard, color: Color, empty: Bitboard) -
         Color::Black => {
             const RANK5: Bitboard = 0x000000FF00000000;
 
-            return (get_single_push_targets(pawns, color, empty) << 8) & empty & RANK5;
+            return (get_single_push_targets(pawns, color, empty) >> 8) & empty & RANK5;
         }
     }
 }
