@@ -34,3 +34,19 @@ pub fn shift_south_east(bitboard: Bitboard) -> Bitboard {
 pub fn shift_south_west(bitboard: Bitboard) -> Bitboard {
     (bitboard >> 9) & NOT_A_FILE
 }
+
+pub fn shift(bitboard: Bitboard, shifts: u8, right: bool) -> Bitboard {
+    let offset = shifts % 8;
+    let out: Bitboard;
+
+    if right {
+        out = bitboard << shifts;
+        match offset {
+            1 => out & NOT_A_FILE,
+        };
+    } else {
+        out = bitboard >> shifts;
+    }
+
+    return out;
+}
