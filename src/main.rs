@@ -14,5 +14,8 @@ fn main() {
 
     board.display_chess_board();
 
-    display_bitboard(move_gen::pawn::get_double_push_targets(board, Color::White));
+    display_bitboard(move_gen::knight::get_knight_move_targets(
+        board,
+        Color::Black,
+    ));
 }

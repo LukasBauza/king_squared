@@ -1,7 +1,10 @@
+use crate::Board;
 use crate::move_gen::files_ranks::FILE_MASKS;
-use crate::types::{Bitboard, File};
+use crate::types::{Bitboard, Color, File, Occupancy, Piece};
 
-pub fn get_knight_move_targets(knights: Bitboard, empty: Bitboard) -> Bitboard {
+pub fn get_knight_move_targets(board: Board, color: Color) -> Bitboard {
+    let knights = board.pieces[color as usize][Piece::Knight as usize];
+
     let moves: [Bitboard; 8] = [
         (knights << 17) & !FILE_MASKS[File::A as usize],
         (knights << 15) & !FILE_MASKS[File::H as usize],
@@ -19,5 +22,5 @@ pub fn get_knight_move_targets(knights: Bitboard, empty: Bitboard) -> Bitboard {
         all_moves |= m;
     }
 
-    return all_moves & empty;
+    return all_moves & board.occupancies[Occupancy::Empty as usize];
 }
