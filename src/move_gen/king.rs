@@ -26,3 +26,7 @@ pub fn get_move_targets(board: Board, color: Color) -> Bitboard {
 
     return all_moves & board.occupancies[Occupancy::Empty as usize];
 }
+
+pub fn get_attack_targets(board: Board, color: Color) -> Bitboard {
+    return get_move_targets(board, color);
+}
