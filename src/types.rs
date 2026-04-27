@@ -1,4 +1,4 @@
-use strum_macros::{EnumIter, FromRepr};
+use strum_macros::{EnumCount, EnumIter, FromRepr};
 
 pub type Bitboard = u64;
 
@@ -29,7 +29,7 @@ pub enum Rank {
 }
 
 #[rustfmt::skip]
-#[derive(FromRepr, EnumIter)]
+#[derive(FromRepr, EnumIter, EnumCount)]
 #[repr(u8)]
 pub enum Square {
     A1 = 0, B1, C1, D1, E1, F1, G1, H1,
